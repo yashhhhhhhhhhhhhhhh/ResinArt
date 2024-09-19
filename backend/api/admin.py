@@ -8,4 +8,4 @@ class ProductAdmin(admin.ModelAdmin):
 
 @admin.register(CartItem)
 class CartAdmin(admin.ModelAdmin):
-    list_display=['product_id','product_name','quantity','price','subtotal']
+    list_display=['product_id','product_name','quantity','subtotal',"time"]

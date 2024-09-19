@@ -16,16 +16,21 @@ class ProductList(ListAPIView):
 @api_view(["POST"])
 def add_cart_items(request):
     errors = []
-    
+    print(request.data)
     # Iterate over each item in the request data
-    for x in request.data:
+    for x in request.data['cartItems']:
+        print(x)
         # Prepare data for the serializer
         data = {
+            # "customer_id":x[""],
             "product_id": x['id'],
             "product_name": x['description'],
             "quantity": x['quantity'],
-            "price": x['price'],
-            "subtotal": x['adjustedPrice']
+            "subtotal": x['total'],
+            # "contact":x["contact"],
+            # "address": x['address'],
+          
+
         }
         
         # Initialize the serializer with the data
@@ -37,7 +42,7 @@ def add_cart_items(request):
             serializer.save()
         else:
             # Collect errors if the data is invalid
-            errors.append(serializer.errors)
+             errors.append(serializer.errors)
     
     # If there are any errors, return them
     if errors:
