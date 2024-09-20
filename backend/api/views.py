@@ -27,8 +27,8 @@ def add_cart_items(request):
             "product_name": x['description'],
             "quantity": x['quantity'],
             "subtotal": x['total'],
-            # "contact":x["contact"],
-            # "address": x['address'],
+            "contact":x["contact"],
+            "address": x['address'],
           
 
         }

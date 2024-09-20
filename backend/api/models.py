@@ -23,6 +23,6 @@ class CartItem(models.Model):
     product_name = models.CharField(max_length=255)
     quantity = models.IntegerField()
     subtotal = models.DecimalField(max_digits=10, decimal_places=2)
-    # contact=models.IntegerField(default=get_default_contact)
-    # address=models.CharField(default=get_default_address,max_length=255)
+    contact=models.IntegerField()
+    address=models.CharField(max_length=255,default='N/A')
     time=models.DateTimeField( default=timezone.now)
