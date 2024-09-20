@@ -1,4 +1,5 @@
-from .models import Product
+from .models import Product,Signup
+from django.contrib.auth import authenticate,login,logout
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render
 from .serializers import ProductSerializer
@@ -7,16 +8,25 @@ from django.http import HttpResponse
 from rest_framework.decorators import api_view
 from rest_framework import status
 from rest_framework.response import Response
-from .serializers import CartItemSerializer
+from .serializers import CartItemSerializer,SignupSerializer,ContactSerializer
+from django.contrib.auth.hashers import make_password
 # Create your views here.
 class ProductList(ListAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+
+@api_view(['POST'])
+def contact_view(request):
+    serializer = ContactSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({"message": "Contact data saved successfully."}, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 @csrf_exempt
 @api_view(["POST"])
 def add_cart_items(request):
     errors = []
-    print(request.data)
+    # print(request.data)
     # Iterate over each item in the request data
     for x in request.data['cartItems']:
         print(x)
@@ -24,32 +34,81 @@ def add_cart_items(request):
         data = {
             # "customer_id":x[""],
             "product_id": x['id'],
+            "buyer_name":x['username'],
             "product_name": x['description'],
             "quantity": x['quantity'],
             "subtotal": x['total'],
             "contact":x["contact"],
             "address": x['address'],
           
-
         }
-        
-        # Initialize the serializer with the data
         serializer = CartItemSerializer(data=data)
-        
-        # Check if the data is valid
         if serializer.is_valid():
-            # Save the valid data
             serializer.save()
         else:
-            # Collect errors if the data is invalid
              errors.append(serializer.errors)
     
-    # If there are any errors, return them
     if errors:
-        return Response(errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    # Return success response if all items are added successfully
+        return Response(errors, status=status.HTTP_400_BAD_REQUEST)  
     return Response({"message": "All items added to cart successfully."}, status=status.HTTP_201_CREATED)
+
+@csrf_exempt
+@api_view(['POST'])
+def Signup(request):
+    print("cdvaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+    errors=[]
+    data={
+        "name":request.data.get("name"),
+        "email":request.data.get("email"),
+         "password":request.data.get("password"),
+        }
+    print("data :",data)
+    serializer = SignupSerializer(data=data)
+    if serializer.is_valid():
+        serializer.save()
+    else:
+          errors.append(serializer.errors)
+    
+    if errors:
+        return Response(errors, status=status.HTTP_400_BAD_REQUEST)  
+    return Response({"message": "Sign up successfully."}, status=status.HTTP_201_CREATED)
+
+
+from django.contrib.auth.hashers import check_password
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+from .models import Signup
+
+@api_view(['POST'])
+def Login(request):
+    # Get the email and password from the request data
+    email1 = request.data.get('email')
+    password = request.data.get('password')
+
+    if email1 is None or password is None:
+        return Response({"error": "Email and password are required"}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Check if a user with the provided email exists
+    try:
+        user = Signup.objects.get(email=email1)
+    except Signup.DoesNotExist:
+        return Response({"error": "Invalid email or password"}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Verify the password
+    if int(password) == int(user.password):
+        # Return username on successful login
+        return Response({"message": "Login successful", "username": user.name}, status=status.HTTP_200_OK)
+    else:
+        return Response({"error": "Invalid email or password"}, status=status.HTTP_400_BAD_REQUEST)
+  
+def Logout(request):
+    # Log the user out
+    logout(request)
+
+    # Return a success message
+    return Response({"message": "Logout successful"}, status=status.HTTP_200_OK)
+
 def data(request):
     # Updated ProductsData with corrected image links
     ProductsData = [

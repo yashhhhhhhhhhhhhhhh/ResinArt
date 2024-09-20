@@ -13,16 +13,27 @@ class Product(models.Model):
     def __str__(self):
         return self.description
 
-def get_default_address():
-    return 'N/A'
-def get_default_contact():
-    return 0
+
 class CartItem(models.Model):
     # customer_id= models.IntegerField()
     product_id = models.IntegerField()
+    buyer_name=models.CharField(max_length=255)
     product_name = models.CharField(max_length=255)
     quantity = models.IntegerField()
     subtotal = models.DecimalField(max_digits=10, decimal_places=2)
     contact=models.IntegerField()
     address=models.CharField(max_length=255,default='N/A')
     time=models.DateTimeField( default=timezone.now)
+
+class Signup(models.Model):
+    name = models.CharField(max_length=100)
+    email = models.EmailField(unique=True)
+    password = models.CharField(max_length=100)
+
+class Contact(models.Model):
+    name = models.CharField(max_length=100)
+    email = models.EmailField()
+    message = models.TextField()
+
+    def __str__(self):
+        return self.name
